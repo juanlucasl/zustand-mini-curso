@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
 export const enum BearSpecies {
-  Black = 'blackBears',
-  Panda = 'pandaBears',
-  Polar = 'polarBears'
+  Black = 'black',
+  Panda = 'panda',
+  Polar = 'polar'
 }
 
 type BearState = {
