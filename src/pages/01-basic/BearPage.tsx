@@ -1,5 +1,5 @@
-import { WhiteCard } from '../../components';
-import { BearSpecies, useBearStore } from '../../stores';
+import { WhiteCard } from "../../components";
+import { BearSpecies, useBearStore } from "../../stores";
 
 export const BearPage = () => {
   return (
@@ -11,6 +11,7 @@ export const BearPage = () => {
         <BearCard species={BearSpecies.Black} />
         <BearCard species={BearSpecies.Polar} />
         <BearCard species={BearSpecies.Panda} />
+        <BearsDisplay />
       </div>
     </>
   );
@@ -37,6 +38,24 @@ const BearCard: React.FC<BearCardProps> = ({ species }) => {
         <span className="text-3xl mx-2 lg:mx-10"> {bears} </span>
         <button onClick={() => updateBears(species, -1)}>-1</button>
       </div>
+    </WhiteCard>
+  );
+};
+
+const BearsDisplay = () => {
+  const bears = useBearStore((state) => state.bears);
+  const addBear = useBearStore((state) => state.addBear);
+  const clearBears = useBearStore((state) => state.clearBears);
+
+  return (
+    <WhiteCard>
+      <h1>Named bears</h1>
+      <button className="mt-2" onClick={addBear}>Add bear</button>
+      <button className="mt-2" onClick={clearBears}>Remove all bears</button>
+
+      <pre>
+        { JSON.stringify(bears, null, 2) }
+      </pre>
     </WhiteCard>
   );
 };
