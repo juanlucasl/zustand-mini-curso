@@ -1,6 +1,7 @@
 import { create, StateCreator } from "zustand";
+import { devtools, persist } from "zustand/middleware";
+import { logger } from "../middlewares/logToConsole.middleware.ts";
 import { jsonSessionStorage } from "../storages/session.storage.ts";
-import { persist } from "zustand/middleware";
 
 export const enum BearSpecies {
   Black = "black",
@@ -24,7 +25,7 @@ type BearState = {
   clearBears: () => void;
 };
 
-const storeApi: StateCreator<BearState> = (set, get) => ({
+const storeApi: StateCreator<BearState, [["zustand/devtools", never]]> = (set, get) => ({
   [BearSpecies.Black]: 10,
   [BearSpecies.Panda]: 1,
   [BearSpecies.Polar]: 5,
@@ -33,8 +34,8 @@ const storeApi: StateCreator<BearState> = (set, get) => ({
   totalBears: (): number => {
     return get()[BearSpecies.Black] + get()[BearSpecies.Panda] + get()[BearSpecies.Polar] + get().bears.length;
   },
-  updateBears: (type, by) => set((state) => ({ [type]: state[type] + by })),
-  resetBearsCount: () => set({ [BearSpecies.Black]: 0, [BearSpecies.Panda]: 0, [BearSpecies.Polar]: 0 }),
+  updateBears: (type, by) => set((state) => ({ [type]: state[type] + by }), undefined, "updateBears"),
+  resetBearsCount: () => set({ [BearSpecies.Black]: 0, [BearSpecies.Panda]: 0, [BearSpecies.Polar]: 0 }, undefined, "resetBearsCount"),
   addBear: () => set(state => {
     const nextBearId = state.bears.length + 1;
     return ({
@@ -43,13 +44,19 @@ const storeApi: StateCreator<BearState> = (set, get) => ({
         name: `Bear #${nextBearId}`
       }]
     });
-  }),
-  clearBears: () => set({ bears: [] })
+  }, undefined, "addBear"),
+  clearBears: () => set({ bears: [] }, undefined, "clearBears")
 });
 
 export const useBearStore = create<BearState>()(
-  persist(storeApi, {
-    name: "bears-data",
-    storage: jsonSessionStorage
-  })
+  logger(
+    devtools(
+      persist(
+        storeApi, {
+          name: "bears-data",
+          storage: jsonSessionStorage
+        }
+      )
+    )
+  )
 );

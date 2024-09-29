@@ -1,5 +1,6 @@
 import { create, type StateCreator } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
+import { logger } from "../middlewares/logToConsole.middleware";
 import { jsonSessionStorage } from "../storages/session.storage";
 
 interface PersonState {
@@ -10,17 +11,23 @@ interface PersonState {
   setLastName: (value: string) => void;
 }
 
-const storeApi: StateCreator<PersonState> = (set) => ({
+const storeApi: StateCreator<PersonState, [["zustand/devtools", never]]> = (set) => ({
   firstName: "",
   lastName: "",
 
-  setFirstName: (value: string) => set({ firstName: value }),
-  setLastName: (value: string) => set({ lastName: value })
+  setFirstName: (value: string) => set({ firstName: value }, undefined, "setFirstName"),
+  setLastName: (value: string) => set({ lastName: value }, undefined, "setLastName")
 });
 
 export const usePersonStore = create<PersonState>()(
-  persist(storeApi, {
-    name: "person-info",
-    storage: jsonSessionStorage
-  })
+  logger(
+    devtools(
+      persist(
+        storeApi, {
+          name: "person-info",
+          storage: jsonSessionStorage
+        }
+      )
+    )
+  )
 );
